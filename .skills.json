@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "skills": {
+    "alirezarezvani-senior-frontend": {
+      "version": "1.0.2",
+      "installedAt": "2026-08-10T15:03:43.438Z",
+      "platform": "gemini"
+    },
+    "alirezarezvani-ui-design-system": {
+      "version": "1.0.0",
+      "installedAt": "2026-08-10T15:03:50.426Z",
+      "platform": "gemini"
+    },
+    "code-review": {
+      "version": "1.0.0",
+      "installedAt": "2026-08-10T15:03:57.611Z",
+      "platform": "gemini",
+      "contentHash": "a36edc8e90bf772b3577c3819abc824edca4e5e434b843c23cce91836e91d00c"
+    }
+  }
+}

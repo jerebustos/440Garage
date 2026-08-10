@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+  
+  <g filter="url(#shadow)">
+    <!-- "44" -->
+    <text x="25" y="190" font-family="Arial, sans-serif" font-weight="bold" font-size="140" fill="white" letter-spacing="-10">44</text>
+    
+    <!-- "0" -->
+    <text x="145" y="190" font-family="Arial, sans-serif" font-weight="bold" font-size="140" fill="white">0</text>
+    
+    <!-- "G" -->
+    <text x="230" y="190" font-family="Arial, sans-serif" font-weight="bold" font-size="140" fill="white">G</text>
+    
+    <!-- Guitar neck extension on the G -->
+    <rect x="250" y="145" width="85" height="15" fill="white" rx="5" />
+    
+    <!-- Tuning pegs on the neck -->
+    <circle cx="265" cy="135" r="5" fill="white" />
+    <circle cx="290" cy="135" r="5" fill="white" />
+    <circle cx="315" cy="135" r="5" fill="white" />
+    <circle cx="265" cy="170" r="5" fill="white" />
+    <circle cx="290" cy="170" r="5" fill="white" />
+    <circle cx="315" cy="170" r="5" fill="white" />
+  </g>
+</svg>
