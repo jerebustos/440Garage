@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Cinzel, Outfit } from "next/font/google";
 import "./globals.css";
 import SmoothScrolling from "@/components/SmoothScrolling";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -18,8 +21,6 @@ export const metadata: Metadata = {
   description: "Queremos ayudarte a elegir tu instrumento inicial o dar el salto a uno profesional. Av. San Martin 519, L6300BBF Santa Rosa, La Pampa.",
 };
 
-import Header from "@/components/Header";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,13 +29,15 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${cinzel.variable} ${outfit.variable} h-full antialiased`}
+      className={`${cinzel.variable} ${outfit.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-black text-white relative font-sans">
+      <body className="flex flex-col bg-black text-white relative font-sans">
         <Header />
         <SmoothScrolling>
           {children}
+          <Footer />
         </SmoothScrolling>
+        <WhatsAppButton />
       </body>
     </html>
   );

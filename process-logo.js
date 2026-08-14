@@ -20,9 +20,9 @@ async function processLogo() {
       const whiteness = Math.min(r, g, b);
       
       let alpha = 0;
-      if (whiteness > 120) {
+      if (whiteness > 180) {
         // Smooth transition for anti-aliasing
-        alpha = Math.min(255, (whiteness - 120) * 2);
+        alpha = Math.min(255, (whiteness - 180) * 3);
       }
       
       // Set pixel to pure white but with the calculated alpha
