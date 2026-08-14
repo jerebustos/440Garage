@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AdminPage() {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -27,6 +29,35 @@ export default function AdminPage() {
     }
   };
 
+  const handleUpload = async () => {
+    if (!file) return;
+    setIsUploading(true);
+    setMessage(null);
+    
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const res = await fetch("/api/admin/import-catalog", {
+        method: "POST",
+        body: formData,
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        setMessage({ type: "success", text: data.message });
+        setFile(null); // Reset file on success
+      } else {
+        setMessage({ type: "error", text: data.error || "Error al subir el archivo" });
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: "Error de red o de servidor." });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pt-32 pb-20 px-6">
       <div className="max-w-3xl mx-auto">
@@ -37,7 +68,24 @@ export default function AdminPage() {
           <p className="text-slate-400 font-light text-lg">
             Sube tu archivo de Excel o CSV para actualizar el stock y los productos de la tienda de forma masiva.
           </p>
+          <div className="mt-6">
+            <a 
+              href="/plantilla_productos.xlsx" 
+              download 
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-gold font-medium transition-colors"
+            >
+              <FileSpreadsheet size={20} />
+              Descargar Plantilla Excel
+            </a>
+          </div>
         </div>
+
+        {message && (
+          <div className={`mb-8 p-4 rounded-lg flex items-center gap-3 ${message.type === 'success' ? 'bg-green-500/10 border border-green-500/20 text-green-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+            {message.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
+            <p className="font-medium">{message.text}</p>
+          </div>
+        )}
 
         {/* Drag & Drop Zone */}
         <motion.div
@@ -56,9 +104,11 @@ export default function AdminPage() {
             type="file"
             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            disabled={isUploading}
             onChange={(e) => {
               if (e.target.files && e.target.files[0]) {
                 setFile(e.target.files[0]);
+                setMessage(null);
               }
             }}
           />
@@ -87,12 +137,19 @@ export default function AdminPage() {
               <button 
                 onClick={(e) => {
                   e.preventDefault();
-                  // Fake upload for UI purposes
-                  alert("Esta acción subirá el archivo cuando conectemos el backend.");
+                  handleUpload();
                 }}
-                className="bg-gold text-black uppercase font-bold tracking-widest py-3 px-8 hover:bg-yellow-500 transition-colors z-20 relative"
+                disabled={isUploading}
+                className="bg-gold text-black uppercase font-bold tracking-widest py-3 px-8 hover:bg-yellow-500 transition-colors z-20 relative disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                Importar Productos
+                {isUploading ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  "Importar Productos"
+                )}
               </button>
             </div>
           )}
@@ -116,6 +173,10 @@ export default function AdminPage() {
             <li className="flex items-start gap-3">
               <CheckCircle2 size={18} className="text-green-500 shrink-0 mt-0.5" />
               <span>La columna de <strong>Imagen</strong> puede contener el link a la foto.</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 size={18} className="text-green-500 shrink-0 mt-0.5" />
+              <span>Opcional: Si los productos ya tienen un <strong>SKU</strong>, podés agregarlo. Si no lo tienen, el sistema generará uno automáticamente.</span>
             </li>
           </ul>
         </div>
