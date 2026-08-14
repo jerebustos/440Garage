@@ -1,8 +1,10 @@
 import React from "react";
 import CatalogClient from "@/components/CatalogClient";
-import { mockProducts } from "@/lib/data/products";
+import { getProducts } from "@/app/actions/productActions";
 
-export default function CatalogoPage() {
+export default async function CatalogoPage() {
+  const products = await getProducts();
+  
   return (
     <div className="min-h-screen bg-background pt-32 pb-20">
       <div className="mb-12 flex flex-col items-center text-center px-6">
@@ -15,7 +17,7 @@ export default function CatalogoPage() {
         </p>
       </div>
       
-      <CatalogClient products={mockProducts} />
+      <CatalogClient products={products} />
     </div>
   );
 }

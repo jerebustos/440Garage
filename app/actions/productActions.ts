@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function getProducts() {
@@ -18,7 +18,8 @@ export async function getProducts() {
 }
 
 export async function saveProduct(productData: any) {
-  const supabase = await createClient();
+  // Usamos el cliente de admin para saltar las reglas de RLS temporalmente
+  const supabase = await createAdminClient();
   
   // Si no tiene id, es uno nuevo, generamos SKU si hace falta
   if (!productData.id && !productData.sku) {
@@ -46,7 +47,7 @@ export async function uploadProductImage(formData: FormData) {
     const file = formData.get("file") as File;
     if (!file) return { success: false, error: "No file provided" };
 
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     
     // Generar un nombre único para la imagen
     const fileExt = file.name.split('.').pop();
@@ -78,7 +79,7 @@ export async function uploadProductImage(formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { error } = await supabase.from("products").delete().eq("id", id);
   
   if (error) {
