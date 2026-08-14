@@ -7,6 +7,9 @@ CREATE TABLE products (
   price DECIMAL(10, 2) NOT NULL,
   stock INTEGER DEFAULT 0,
   image_url TEXT,
+  category VARCHAR(100),
+  subcategory VARCHAR(100),
+  brand VARCHAR(100),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -45,6 +45,9 @@ export async function POST(request: Request) {
         price: parseFloat(normalizedRow["precio"] || normalizedRow["price"] || "0"),
         stock: parseInt(normalizedRow["stock"] || normalizedRow["cantidad"] || "0", 10),
         image_url: normalizedRow["imagen"] || normalizedRow["image"] || normalizedRow["image_url"] || null,
+        category: normalizedRow["categoría"] || normalizedRow["categoria"] || normalizedRow["category"] || null,
+        subcategory: normalizedRow["subcategoría"] || normalizedRow["subcategoria"] || normalizedRow["subcategory"] || null,
+        brand: normalizedRow["marca"] || normalizedRow["brand"] || null,
       };
     });
 
