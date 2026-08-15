@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Menu, ShoppingCart, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCartStore } from "@/store/useCartStore";
 import CartDrawer from "./CartDrawer";
@@ -15,13 +16,14 @@ interface HeaderProps {
 export default function Header({ forceSolid = false }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
   
   // Zustand store
   const { getCartCount, toggleDrawer } = useCartStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => setMounted(true), 0);
   }, []);
 
   useEffect(() => {
@@ -39,32 +41,31 @@ export default function Header({ forceSolid = false }: HeaderProps) {
 
   const solidBackground = forceSolid || isScrolled;
 
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <>
       <header className={`fixed top-0 left-0 w-full z-50 px-6 py-4 flex items-center justify-between pointer-events-auto transition-colors duration-500 ${solidBackground ? "bg-background/90 backdrop-blur-md border-b border-black/5" : "bg-transparent"}`}>
         
         {/* Desktop Nav (hidden on mobile) */}
         <nav className="hidden md:flex items-center gap-8 text-white font-medium z-50">
-          <Link href="/" className="relative group hover:text-gold transition-colors">
-            Inicio
-            <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-          </Link>
-          <Link href="/catalogo" className="relative group hover:text-gold transition-colors">
-            Catálogo
-            <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-          </Link>
-          <Link href="/usados" className="relative group hover:text-gold transition-colors">
-            Usados
-            <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-          </Link>
-          <Link href="/outlet" className="relative group hover:text-gold transition-colors">
-            Outlet
-            <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-          </Link>
-          <Link href="/eventos" className="relative group hover:text-gold transition-colors">
-            Eventos
-            <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-          </Link>
+          {[
+            { name: "Inicio", path: "/" },
+            { name: "Catálogo", path: "/catalogo" },
+            { name: "Usados", path: "/usados" },
+            { name: "Outlet", path: "/outlet" },
+            { name: "Eventos", path: "/eventos" }
+          ].map((link) => {
+            const isActive = pathname === link.path;
+            return (
+              <Link key={link.path} href={link.path} className={`relative group transition-colors ${isActive ? "text-gold" : "hover:text-gold"}`}>
+                {link.name}
+                <span className={`absolute -bottom-1 left-0 h-[2px] bg-gold transition-all duration-300 ease-out ${isActive ? "w-full" : "w-0 group-hover:w-full"}`}></span>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Mobile Hamburger (hidden on desktop) */}
@@ -135,26 +136,21 @@ export default function Header({ forceSolid = false }: HeaderProps) {
               <X size={40} />
             </button>
             <nav className="flex flex-col items-center gap-8 text-3xl font-heading font-bold text-foreground uppercase tracking-wider">
-              <Link href="/" onClick={() => setIsMenuOpen(false)} className="relative group hover:text-gold transition-colors">
-                Inicio
-                <span className="absolute -bottom-2 left-0 w-0 h-[3px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-              </Link>
-              <Link href="/catalogo" onClick={() => setIsMenuOpen(false)} className="relative group hover:text-gold transition-colors">
-                Catálogo
-                <span className="absolute -bottom-2 left-0 w-0 h-[3px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-              </Link>
-              <Link href="/usados" onClick={() => setIsMenuOpen(false)} className="relative group hover:text-gold transition-colors">
-                Usados
-                <span className="absolute -bottom-2 left-0 w-0 h-[3px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-              </Link>
-              <Link href="/outlet" onClick={() => setIsMenuOpen(false)} className="relative group hover:text-gold transition-colors">
-                Outlet
-                <span className="absolute -bottom-2 left-0 w-0 h-[3px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-              </Link>
-              <Link href="/eventos" onClick={() => setIsMenuOpen(false)} className="relative group hover:text-gold transition-colors">
-                Eventos
-                <span className="absolute -bottom-2 left-0 w-0 h-[3px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
-              </Link>
+              {[
+                { name: "Inicio", path: "/" },
+                { name: "Catálogo", path: "/catalogo" },
+                { name: "Usados", path: "/usados" },
+                { name: "Outlet", path: "/outlet" },
+                { name: "Eventos", path: "/eventos" }
+              ].map((link) => {
+                const isActive = pathname === link.path;
+                return (
+                  <Link key={link.path} href={link.path} onClick={() => setIsMenuOpen(false)} className={`relative group transition-colors ${isActive ? "text-gold" : "hover:text-gold"}`}>
+                    {link.name}
+                    <span className={`absolute -bottom-2 left-0 h-[3px] bg-gold transition-all duration-300 ease-out ${isActive ? "w-full" : "w-0 group-hover:w-full"}`}></span>
+                  </Link>
+                );
+              })}
               <Link href="#contacto" onClick={() => setIsMenuOpen(false)} className="relative group hover:text-gold transition-colors">
                 Contacto
                 <span className="absolute -bottom-2 left-0 w-0 h-[3px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>

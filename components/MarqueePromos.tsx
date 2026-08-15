@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 
 export default function MarqueePromos() {
-  const [promos, setPromos] = useState<any[]>([]);
+  const [promos, setPromos] = useState<Record<string, any>[]>([]);
 
   useEffect(() => {
     async function fetchPromos() {

@@ -1,10 +1,11 @@
 import ProductCard from "@/components/ProductCard";
 import { getProducts } from "@/app/actions/productActions";
 import Image from "next/image";
+import { Product } from "@/lib/data/products";
 
 export default async function UsadosPage() {
   const allProducts = await getProducts();
-  const products = allProducts.filter((p: any) => p.is_used);
+  const products = allProducts.filter((p: Product) => p.is_used);
 
   return (
     <div className="min-h-screen bg-background pb-20">

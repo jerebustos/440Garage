@@ -34,7 +34,7 @@ export default function EventCard({ event, index }: EventCardProps) {
       const formatted = new Intl.DateTimeFormat('es-AR', options).format(date);
       // Capitalize first letter (e.g. "sábado, 28 de octubre" -> "Sábado, 28 de octubre")
       return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-    } catch (e) {
+    } catch {
       return dateString; // fallback to original string if error
     }
   };

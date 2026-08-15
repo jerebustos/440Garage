@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import CatalogClient from "@/components/CatalogClient";
 import { getProducts } from "@/app/actions/productActions";
 import Image from "next/image";
@@ -19,7 +19,9 @@ export default async function CatalogoPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
       </div>
       
-      <CatalogClient products={products} />
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-white">Cargando catálogo...</div>}>
+        <CatalogClient products={products} />
+      </Suspense>
     </div>
   );
 }

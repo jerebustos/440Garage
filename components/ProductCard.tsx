@@ -70,11 +70,14 @@ export default function ProductCard({ id, name, price, imageUrl, brand, is_used,
         )}
         
         {/* Hover overlay gradient for aesthetic blend */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10" />
+        
+        {/* Permanent Inner Shadow to integrate white background with dark theme */}
+        <div className="absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.15)] pointer-events-none z-10" />
       </div>
 
       {/* Minimalist Details */}
-      <div className="flex flex-col gap-2 p-5 sm:p-6 z-30 pointer-events-none">
+      <div className="flex flex-col gap-2 p-5 sm:p-6 z-30 pointer-events-none mt-auto">
         {brand && (
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold/80">
             {brand}
@@ -83,48 +86,46 @@ export default function ProductCard({ id, name, price, imageUrl, brand, is_used,
         <h3 className="text-base sm:text-lg font-medium text-slate-200 group-hover:text-white transition-colors line-clamp-2 leading-snug">
           {name}
         </h3>
-        <div className="flex items-end justify-between mt-2">
+        <div className="flex items-center justify-between mt-3 pointer-events-auto relative z-30">
           {stock === 0 ? (
-            <span className="text-xl sm:text-2xl font-bold text-red-500 tracking-wide uppercase text-sm">
-              Sin stock
+            <span className="text-sm font-bold text-red-500 tracking-wide uppercase">
+              Agotado
             </span>
           ) : (
             <span className="text-xl sm:text-2xl font-bold text-white tracking-wide">
               ${price.toLocaleString("es-AR")}
             </span>
           )}
-        </div>
-      </div>
 
-      {/* Add to Cart Button */}
-      <div className="px-5 pb-5 sm:px-6 sm:pb-6 z-30 mt-auto relative">
-        <button 
-          disabled={stock === 0}
-          onClick={(e) => {
-            e.preventDefault(); // Prevent link navigation
-            if (stock > 0 && !isAdded) {
-              addItem({ id, name, price, imageUrl });
-              setIsAdded(true);
-              setTimeout(() => setIsAdded(false), 2000);
-            }
-          }}
-          className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 font-medium tracking-wide group/btn cursor-pointer ${
-            stock === 0 
-              ? "bg-white/5 text-slate-500 border border-white/5 cursor-not-allowed" 
-              : isAdded 
-                ? "bg-emerald-500 text-black border-emerald-400"
-                : "bg-white/5 hover:bg-gold text-white hover:text-black border border-white/10 hover:border-gold"
-          }`}
-        >
-          {isAdded ? (
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-              <Check size={18} />
-            </motion.div>
-          ) : (
-            <ShoppingCart size={18} className={stock > 0 ? "group-hover/btn:-translate-y-0.5 transition-transform" : ""} />
+          {stock > 0 && (
+            <button 
+              disabled={stock === 0}
+              onClick={(e) => {
+                e.preventDefault(); // Prevent link navigation
+                if (stock > 0 && !isAdded) {
+                  addItem({ id, name, price, imageUrl });
+                  setIsAdded(true);
+                  setTimeout(() => setIsAdded(false), 2000);
+                }
+              }}
+              className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 font-medium tracking-wide group/btn cursor-pointer ${
+                isAdded 
+                  ? "bg-emerald-500 text-black border-emerald-400 shadow-lg shadow-emerald-500/20"
+                  : "bg-white/5 hover:bg-gold text-white hover:text-black border border-white/10 hover:border-gold"
+              }`}
+              title={isAdded ? "¡Agregado!" : "Agregar"}
+            >
+              {isAdded ? (
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                  <Check size={18} />
+                </motion.div>
+              ) : (
+                <ShoppingCart size={18} className="group-hover/btn:-translate-y-0.5 transition-transform" />
+              )}
+              <span className="text-xs sm:text-sm">{isAdded ? "Agregado" : "Agregar"}</span>
+            </button>
           )}
-          <span>{stock === 0 ? "Agotado" : isAdded ? "¡Agregado!" : "Agregar al carrito"}</span>
-        </button>
+        </div>
       </div>
 
     </motion.div>

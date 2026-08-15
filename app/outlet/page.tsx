@@ -2,10 +2,11 @@ import React from "react";
 import ProductCard from "@/components/ProductCard";
 import { getProducts } from "@/app/actions/productActions";
 import Image from "next/image";
+import { Product } from "@/lib/data/products";
 
 export default async function OutletPage() {
   const allProducts = await getProducts();
-  const products = allProducts.filter((p: any) => p.is_outlet);
+  const products = allProducts.filter((p: Product) => p.is_outlet);
 
   return (
     <div className="min-h-screen bg-background pb-20">

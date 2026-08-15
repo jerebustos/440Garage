@@ -1,6 +1,13 @@
 "use client";
 
+import { MessageCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
+
 export default function WhatsAppButton() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/admin')) return null;
+
   const phoneNumber = "5492954396545"; // +54 9 2954 39-6545
   const message = "Hola! Vengo de la página web y quiero hacer una consulta.";
   

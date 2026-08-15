@@ -17,7 +17,7 @@ export async function getEvents() {
   return data;
 }
 
-export async function saveEvent(eventData: any) {
+export async function saveEvent(eventData: Record<string, unknown>) {
   const supabase = await createAdminClient();
   
   const { data, error } = await supabase

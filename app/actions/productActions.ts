@@ -1,21 +1,35 @@
 "use server";
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
-export async function getProducts() {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false });
+// Cliente público sin acceso a cookies para permitir el caché estático
+const getPublicClient = () => {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+};
 
-  if (error) {
-    console.error("Error fetching products:", error);
-    return [];
-  }
-  return data;
-}
+// Obtenemos los productos de Supabase, pero lo cacheamos
+export const getProducts = unstable_cache(
+  async () => {
+    const supabase = getPublicClient();
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching products:", error);
+      return [];
+    }
+    return data;
+  },
+  ["products-cache"],
+  { tags: ["products"], revalidate: 3600 }
+);
 
 export async function getProductById(id: string) {
   const supabase = await createClient();
@@ -32,7 +46,14 @@ export async function getProductById(id: string) {
   return data;
 }
 
-export async function saveProduct(productData: any) {
+export async function saveProduct(productData: Record<string, unknown>) {
+  // Verificar autenticación primero
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) {
+    return { success: false, error: "No autorizado. Debes iniciar sesión." };
+  }
+
   // Usamos el cliente de admin para saltar las reglas de RLS temporalmente
   const supabase = await createAdminClient();
   
@@ -52,13 +73,19 @@ export async function saveProduct(productData: any) {
     return { success: false, error: error.message };
   }
 
+  // @ts-expect-error Next.js 16 typing
+  revalidateTag("products");
   revalidatePath("/admin");
-  revalidatePath("/");
   return { success: true, data };
 }
 
 export async function uploadProductImage(formData: FormData) {
   try {
+    // Verificar autenticación
+    const authClient = await createClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) return { success: false, error: "No autorizado." };
+
     const file = formData.get("file") as File;
     if (!file) return { success: false, error: "No file provided" };
 
@@ -69,7 +96,7 @@ export async function uploadProductImage(formData: FormData) {
     const fileName = `${Math.random().toString(36).substring(2, 15)}-${Date.now()}.${fileExt}`;
     const filePath = `images/${fileName}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('product-images')
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -87,13 +114,18 @@ export async function uploadProductImage(formData: FormData) {
       .getPublicUrl(filePath);
 
     return { success: true, url: publicUrl };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error uploading image:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
 export async function deleteProduct(id: string) {
+  // Verificar autenticación
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) return { success: false, error: "No autorizado." };
+
   const supabase = await createAdminClient();
   const { error } = await supabase.from("products").delete().eq("id", id);
   
@@ -101,7 +133,8 @@ export async function deleteProduct(id: string) {
     return { success: false, error: error.message };
   }
   
+  // @ts-expect-error Next.js 16 typing
+  revalidateTag("products");
   revalidatePath("/admin");
-  revalidatePath("/");
   return { success: true };
 }

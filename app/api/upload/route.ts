@@ -9,10 +9,9 @@ export async function POST(request: Request) {
     // Check auth, verify user is admin
     const { data: { user } } = await supabase.auth.getUser();
     
-    // For production, you should check user role or specific claims.
-    // if (!user || user.user_metadata?.role !== 'admin') {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
 
     // Parse formData to get the Excel file
     const formData = await request.formData();
@@ -32,7 +31,8 @@ export async function POST(request: Request) {
     
     // Extract JSON data
     // Expected headers: sku, name, description, price, stock, image_url
-    const data: any[] = xlsx.utils.sheet_to_json(sheet);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: Record<string, any>[] = xlsx.utils.sheet_to_json(sheet);
     
     if (data.length === 0) {
       return NextResponse.json({ error: "El archivo está vacío o mal formateado" }, { status: 400 });
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       message: `Se han procesado ${data.length} productos con éxito.` 
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Upload handler error:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }

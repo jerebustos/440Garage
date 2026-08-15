@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { login } from "@/app/actions/authActions";
 import { Lock, Mail, Loader2 } from "lucide-react";
-import Image from "next/image";
 
 export default function LoginForm() {
   const [error, setError] = useState<string | null>(null);

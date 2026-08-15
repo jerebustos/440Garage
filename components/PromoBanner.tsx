@@ -4,7 +4,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PromoBanner() {
-  const [isAdmin, setIsAdmin] = useState(false); // Admin simulado: oculto por defecto
+  const [isAdmin] = useState(false); // In a real app, verify user sessionfecto
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // En el futuro, estas imágenes vendrán de Supabase. 

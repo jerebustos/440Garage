@@ -25,7 +25,7 @@ export default function LiveMusic() {
               La Música <br className="hidden md:block" /> Sale a la <span className="text-gold">Calle</span>
             </h2>
             <p className="text-slate-600 font-light text-lg mb-8 max-w-xl mx-auto lg:mx-0">
-              No solo vendemos instrumentos, los vivimos. Nuestra vereda se transforma en un escenario improvisado donde músicos locales comparten su arte. Únete a nuestras famosas "Jam Sessions" al aire libre.
+              &quot;Creemos que la música en vivo es el corazón de nuestra cultura.&quot; Nuestra vereda se transforma en un escenario improvisado donde músicos locales comparten su arte. Únete a nuestras famosas &quot;Jam Sessions&quot; al aire libre.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">

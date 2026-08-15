@@ -3,7 +3,9 @@
 import React, { useState, useMemo, useEffect } from "react";
 import ProductCard from "./ProductCard";
 import { Product } from "@/lib/data/products";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Search, SlidersHorizontal, X, Music } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CatalogClientProps {
   products: Product[];
@@ -31,14 +33,18 @@ export default function CatalogClient({ products }: CatalogClientProps) {
 
   const brands = useMemo(() => Array.from(new Set(products.map((p) => p.brand).filter(Boolean))), [products]);
 
-  // Read URL params on mount (e.g. ?categoria=bateria)
+  const searchParams = useSearchParams();
+
+  // Read URL params on mount or when they change (e.g. ?categoria=bateria)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const cat = params.get("categoria");
+    const cat = searchParams.get("categoria");
     if (cat) {
-      setSelectedCategory(cat);
+      // Fixes cascading renders error while still initializing from URL
+      setTimeout(() => setSelectedCategory(cat), 0);
+    } else {
+      setTimeout(() => setSelectedCategory(null), 0);
     }
-  }, []);
+  }, [searchParams]);
 
   const filteredProducts = useMemo(() => {
     let result = products;
@@ -76,13 +82,13 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     }
   };
 
-  const Sidebar = () => (
+  const renderSidebar = () => (
     <div className="flex flex-col gap-8">
       <div>
         <h3 className="text-white font-heading font-bold text-xl uppercase mb-4 tracking-wider flex justify-between items-center">
           Filtros
           {(selectedCategory || selectedBrand) && (
-            <button onClick={clearFilters} className="text-xs text-gold font-normal hover:underline normal-case">
+            <button aria-label="Limpiar filtros" onClick={clearFilters} className="text-xs text-gold font-normal hover:underline normal-case">
               Limpiar
             </button>
           )}
@@ -102,7 +108,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   checked={selectedCategory === cat}
                   onChange={() => {
                     if (selectedCategory === cat) {
-                      // Allow unselecting category by clicking it again
                       setSelectedCategory(null);
                       setSelectedSubcategory(null);
                     } else {
@@ -110,8 +115,6 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                       setSelectedSubcategory(null);
                     }
                   }}
-                  // Fix Next.js warning by using onClick instead of onChange for toggle ability on radios, or just a custom button.
-                  // But standard radio works for selection. For toggle, we can just use the click handler.
                   onClick={(e) => {
                     if (selectedCategory === cat) {
                       e.preventDefault();
@@ -186,57 +189,75 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row gap-10">
       
       {/* Botón de filtros móvil */}
-      <div className="md:hidden flex justify-between items-center mb-4">
+      <div className="md:hidden flex justify-between items-center mb-6">
         <button 
+          aria-label="Filtros"
           onClick={() => setIsMobileFiltersOpen(true)}
-          className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg border border-slate-700"
+          className="flex items-center gap-2 text-white bg-white/5 border border-white/10 px-4 py-2 rounded-lg"
         >
-          <SlidersHorizontal size={18} /> Filtros
+          <SlidersHorizontal size={18} />
+          <span className="font-medium tracking-wide">Filtros</span>
         </button>
         <span className="text-slate-400">{filteredProducts.length} resultados</span>
       </div>
 
       {/* Sidebar Desktop */}
       <aside className="hidden md:block w-64 flex-shrink-0 border-r border-slate-800 pr-8">
-        <Sidebar />
+        {renderSidebar()}
       </aside>
 
-      {/* Modal Sidebar Móvil */}
-      {isMobileFiltersOpen && (
-        <div className="fixed inset-0 z-[70] bg-black/80 flex">
-          <div className="w-80 max-w-[80%] bg-background h-full p-6 border-r border-slate-800 overflow-y-auto">
-            <div className="flex justify-end mb-6">
-              <button onClick={() => setIsMobileFiltersOpen(false)} className="text-slate-400 hover:text-white">
-                <X size={24} />
-              </button>
-            </div>
-            <Sidebar />
-          </div>
-          <div className="flex-1" onClick={() => setIsMobileFiltersOpen(false)}></div>
-        </div>
-      )}
+      {/* Modal Sidebar Móvil Animado */}
+      <AnimatePresence>
+        {isMobileFiltersOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] bg-black/80 flex"
+          >
+            <motion.div 
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="w-80 max-w-[80%] bg-background h-full p-6 border-r border-slate-800 overflow-y-auto"
+            >
+              <div className="flex justify-between items-center p-6 border-b border-white/10">
+                <h3 className="text-white font-heading font-bold text-xl uppercase tracking-wider">Filtros</h3>
+                <button aria-label="Cerrar filtros" onClick={() => setIsMobileFiltersOpen(false)} className="text-slate-400 hover:text-white">
+                  <X size={24} />
+                </button>
+              </div>
+              {renderSidebar()}
+            </motion.div>
+            <div className="flex-1" onClick={() => setIsMobileFiltersOpen(false)}></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <div className="flex-1">
         {/* Top Bar (Search & Sort) */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div className="relative w-full sm:w-72">
-            <input 
-              type="text" 
-              placeholder="Buscar productos..."
+          <div className="flex-1 max-w-md relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-gold transition-colors" size={20} />
+            <input
+              type="text"
+              aria-label="Buscar productos"
+              placeholder="Buscar modelos, marcas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-2 pl-10 rounded-lg focus:outline-none focus:border-gold transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-full py-3 pl-12 pr-4 text-white focus:outline-none focus:border-gold/50 transition-colors"
             />
-            <Search className="absolute left-3 top-2.5 text-slate-500" size={18} />
           </div>
 
           <div className="flex items-center gap-4 w-full sm:w-auto">
             <span className="text-slate-400 hidden md:inline">{filteredProducts.length} resultados</span>
             <select 
+              aria-label="Ordenar productos"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-slate-900 border border-slate-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-gold w-full sm:w-auto"
+              className="bg-background border border-white/10 text-slate-300 py-3 px-4 rounded-full focus:outline-none focus:border-gold/50 appearance-none min-w-[160px] cursor-pointer"
             >
               <option value="recommended">Recomendados</option>
               <option value="price_asc">Menor precio</option>
@@ -263,15 +284,25 @@ export default function CatalogClient({ products }: CatalogClientProps) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-slate-900/50 rounded-xl border border-slate-800 border-dashed">
-            <p className="text-slate-400 text-lg">No encontramos productos que coincidan con tu búsqueda.</p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center py-24 px-6 bg-white/[0.02] rounded-2xl border border-white/5 text-center"
+          >
+            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
+              <Music size={40} className="text-slate-500" />
+            </div>
+            <h3 className="text-2xl font-heading font-bold text-white mb-2 tracking-wide">Sin Resultados</h3>
+            <p className="text-slate-400 text-lg max-w-md mb-8">
+              No encontramos ningún instrumento que coincida con tu búsqueda actual. Probá ajustando los filtros.
+            </p>
             <button 
               onClick={clearFilters}
-              className="mt-4 text-gold hover:underline"
+              className="bg-gold text-black font-semibold px-8 py-3 rounded-lg hover:bg-gold-400 transition-colors"
             >
-              Limpiar filtros
+              Limpiar todos los filtros
             </button>
-          </div>
+          </motion.div>
         )}
       </div>
 

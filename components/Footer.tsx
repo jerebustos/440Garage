@@ -1,16 +1,19 @@
 "use client";
 import React from "react";
-import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
+import Image from "next/image";
+
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
-  // Coordenadas de Santa Rosa, La Pampa, Argentina
-  const position = { lat: -36.6167, lng: -64.2833 };
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/admin')) return null;
 
   return (
     <footer id="contacto" className="bg-slate-950 border-t border-slate-800 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div className="flex flex-col gap-6">
-          <img src="/logo-new.png" alt="440Garage" className="w-48" />
+          <Image src="/logo-new.png" alt="440Garage" width={192} height={64} className="w-48 h-auto" />
           <p className="text-slate-400 text-lg">
             Queremos ayudarte a elegir tu instrumento inicial o dar el salto a uno profesional.
           </p>

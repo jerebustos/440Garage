@@ -8,12 +8,15 @@ export default function Hero() {
       <video
         className="absolute top-0 left-0 w-full h-full object-cover opacity-60"
         src="/hero-video.mp4"
+        poster="/hero-poster.jpg"
         autoPlay
         loop
         muted
         playsInline
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black z-0 pointer-events-none"></div>
+      {/* Radial Vignette + Bottom Fade */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)] z-0 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent z-0 pointer-events-none"></div>
       <div className="hero-text relative z-10 flex flex-col items-center justify-center text-white text-center px-6">
         <motion.h1 
           initial={{ opacity: 0, y: 30 }}

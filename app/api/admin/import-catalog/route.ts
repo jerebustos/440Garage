@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import * as xlsx from "xlsx";
 
 export async function POST(request: Request) {
   try {
+    // Verificar autenticación
+    const authClient = await createClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const supabase = await createAdminClient();
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -21,7 +28,8 @@ export async function POST(request: Request) {
     const sheet = workbook.Sheets[sheetName];
     
     // Parsear la hoja a JSON
-    const data = xlsx.utils.sheet_to_json(sheet);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: Record<string, any>[] = xlsx.utils.sheet_to_json(sheet);
 
     if (!data || data.length === 0) {
       return NextResponse.json({ error: "El archivo está vacío o no se pudo leer" }, { status: 400 });
@@ -29,7 +37,7 @@ export async function POST(request: Request) {
 
     // Preparar el array de productos a insertar/actualizar
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const productsToUpsert = data.map((row: any) => {
+    const productsToUpsert = data.map((row: Record<string, any>) => {
       // Normalizar nombres de columnas (pasar a minúsculas para facilitar)
       const normalizedRow: Record<string, any> = {};
       for (const key in row) {
@@ -77,8 +85,8 @@ export async function POST(request: Request) {
       count: productsToUpsert.length
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error procesando excel:", error);
-    return NextResponse.json({ error: `Error interno: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: `Error interno: ${error instanceof Error ? error.message : String(error)}` }, { status: 500 });
   }
 }

@@ -5,21 +5,21 @@ import Link from "next/link";
 const topCategories = [
   {
     id: "pedales-accesorios",
-    name: "Pedales y Accesorios",
+    name: "Pedales y Efectos",
     image: "/images/categories/pedales.jpg",
-    link: "/catalogo?categoria=pedales",
+    link: "/catalogo?categoria=Amplificadores%20y%20Efectos",
   },
   {
     id: "cuerdas",
     name: "Instrumentos de Cuerda",
     image: "/images/categories/cuerdas.jpg",
-    link: "/catalogo?categoria=cuerdas",
+    link: "/catalogo?categoria=Instrumentos%20de%20Cuerda",
   },
   {
     id: "bateria-percusion",
     name: "Batería y Percusión",
     image: "/images/categories/bateria.jpg",
-    link: "/catalogo?categoria=bateria",
+    link: "/catalogo?categoria=Percusi%C3%B3n",
   },
 ];
 
@@ -28,7 +28,7 @@ const bottomCategories = [
     id: "teclados-pianos",
     name: "Teclados y Pianos",
     image: "/images/categories/teclados.jpg",
-    link: "/catalogo?categoria=teclados",
+    link: "/catalogo?categoria=Pianos%20y%20Teclados",
   },
   {
     id: "vientos",
@@ -38,15 +38,15 @@ const bottomCategories = [
   },
   {
     id: "microfonos-amplificadores",
-    name: "Micrófonos y Amplificadores",
+    name: "Audio Profesional",
     image: "/images/categories/audio.jpg",
-    link: "/catalogo?categoria=audio",
+    link: "/catalogo?categoria=Audio%20Profesional",
   },
   {
-    id: "accesorios-audio",
-    name: "Accesorios para Audio y Video",
+    id: "accesorios",
+    name: "Accesorios y Soportes",
     image: "/images/categories/accesorios.jpg",
-    link: "/catalogo?categoria=accesorios",
+    link: "/catalogo?categoria=Accesorios",
   },
 ];
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { getProducts, saveProduct, uploadProductImage, deleteProduct } from "@/app/actions/productActions";
 import { Plus, Edit2, Trash2, Image as ImageIcon, Loader2, X } from "lucide-react";
 import Image from "next/image";
+import { Product } from "@/lib/data/products";
 
 const INSTRUMENT_CATEGORIES: Record<string, string[]> = {
   "Instrumentos de Cuerda": ["Guitarras Eléctricas", "Guitarras Acústicas", "Bajos", "Ukeleles", "Violines"],
@@ -21,10 +22,10 @@ const COMMON_BRANDS = [
 ];
 
 export default function ProductManager() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
   // Form states
   const [formData, setFormData] = useState({
@@ -43,10 +44,6 @@ export default function ProductManager() {
   const [isSaving, setIsSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
   const fetchProducts = async () => {
     setLoading(true);
     const data = await getProducts();
@@ -54,7 +51,12 @@ export default function ProductManager() {
     setLoading(false);
   };
 
-  const handleOpenModal = (product: any = null) => {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProducts();
+  }, []);
+
+  const handleOpenModal = (product: Product | null = null) => {
     if (product) {
       setEditingProduct(product);
       setFormData({
@@ -103,11 +105,13 @@ export default function ProductManager() {
         }
       }
 
-      const productToSave = {
+      const productToSave: Record<string, any> = {
         ...formData,
-        id: editingProduct?.id, // undefined si es nuevo
         image_url: finalImageUrl,
       };
+      if (editingProduct?.id) {
+        productToSave.id = editingProduct.id;
+      }
 
       const res = await saveProduct(productToSave);
       
@@ -201,8 +205,8 @@ export default function ProductManager() {
                     ${Number(product.price).toLocaleString('es-AR')}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${product.stock > 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                      {product.stock}
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${(product.stock || 0) > 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                      {product.stock || 0}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">

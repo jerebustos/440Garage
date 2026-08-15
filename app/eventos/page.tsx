@@ -26,6 +26,7 @@ export default async function EventosPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-8">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {events.map((event: any, index: number) => (
               <EventCard key={event.id} event={event} index={index} />
             ))}

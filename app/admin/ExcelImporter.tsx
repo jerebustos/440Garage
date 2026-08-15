@@ -51,7 +51,7 @@ export default function ExcelImporter() {
       } else {
         setMessage({ type: "error", text: data.error || "Error al subir el archivo" });
       }
-    } catch (err) {
+    } catch {
       setMessage({ type: "error", text: "Error de red o de servidor." });
     } finally {
       setIsUploading(false);

@@ -1,9 +1,28 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, ChevronRight, Flame } from "lucide-react";
+import { ShieldCheck, Flame, ChevronRight, Truck } from "lucide-react";
+import { Metadata } from "next";
 import AddToCartButton from "@/components/AddToCartButton";
 import { getProductById } from "@/app/actions/productActions";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProductById(id);
+  
+  if (!product) return { title: "Producto no encontrado" };
+
+  return {
+    title: product.name,
+    description: product.description || `Comprá ${product.name} en 440Garage. Envíos a todo el país y garantía local.`,
+    openGraph: {
+      title: product.name,
+      description: product.description || `Comprá ${product.name} en 440Garage. Envíos a todo el país y garantía local.`,
+      images: product.image_url ? [product.image_url] : [],
+      type: "website",
+    }
+  };
+}
 
 export default async function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,8 +43,35 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
     product.is_outlet ? "Producto en Outlet / Oferta especial" : null,
   ].filter(Boolean) : ["Producto de alta calidad", "Garantía de tienda"];
 
+  // Generar JSON-LD para Google Shopping y Rich Snippets
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.image_url ? [product.image_url] : [],
+    description: product.description || `Comprá ${product.name} en 440Garage. Envíos a todo el país.`,
+    sku: product.sku || product.id,
+    brand: {
+      '@type': 'Brand',
+      name: product.brand || '440Garage',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://440garage.com'}/producto/${product.id}`,
+      priceCurrency: 'ARS',
+      price: product.price,
+      itemCondition: product.is_used ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition',
+      availability: product.stock && product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background pt-28 pb-20">
+      {/* Añadir script JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Breadcrumb */}
         <nav className="flex flex-wrap items-center gap-2 text-sm text-slate-400 mb-8">
