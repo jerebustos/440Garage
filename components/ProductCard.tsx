@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Check, Flame } from "lucide-react";
+import { useCartStore } from "@/store/useCartStore";
 
 interface ProductCardProps {
   id: string;
@@ -18,6 +19,8 @@ interface ProductCardProps {
 
 export default function ProductCard({ id, name, price, imageUrl, brand, is_used, is_outlet, stock = 1 }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+  const { addItem } = useCartStore();
 
   return (
     <motion.div 
@@ -38,8 +41,9 @@ export default function ProductCard({ id, name, price, imageUrl, brand, is_used,
           </span>
         )}
         {is_outlet && (
-          <span className="bg-red-900/90 backdrop-blur-md border border-red-500/30 text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full shadow-lg">
+          <span className="bg-red-900/90 backdrop-blur-md border border-red-500/30 text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
             Outlet
+            <Flame size={12} className="text-orange-400 animate-flame" />
           </span>
         )}
       </div>
@@ -98,18 +102,28 @@ export default function ProductCard({ id, name, price, imageUrl, brand, is_used,
           disabled={stock === 0}
           onClick={(e) => {
             e.preventDefault(); // Prevent link navigation
-            if (stock > 0) {
-              alert(`Añadido al carrito: ${name}`);
+            if (stock > 0 && !isAdded) {
+              addItem({ id, name, price, imageUrl });
+              setIsAdded(true);
+              setTimeout(() => setIsAdded(false), 2000);
             }
           }}
           className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 font-medium tracking-wide group/btn cursor-pointer ${
             stock === 0 
               ? "bg-white/5 text-slate-500 border border-white/5 cursor-not-allowed" 
-              : "bg-white/5 hover:bg-gold text-white hover:text-black border border-white/10 hover:border-gold"
+              : isAdded 
+                ? "bg-emerald-500 text-black border-emerald-400"
+                : "bg-white/5 hover:bg-gold text-white hover:text-black border border-white/10 hover:border-gold"
           }`}
         >
-          <ShoppingCart size={18} className={stock > 0 ? "group-hover/btn:-translate-y-0.5 transition-transform" : ""} />
-          <span>{stock === 0 ? "Agotado" : "Agregar al carrito"}</span>
+          {isAdded ? (
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+              <Check size={18} />
+            </motion.div>
+          ) : (
+            <ShoppingCart size={18} className={stock > 0 ? "group-hover/btn:-translate-y-0.5 transition-transform" : ""} />
+          )}
+          <span>{stock === 0 ? "Agotado" : isAdded ? "¡Agregado!" : "Agregar al carrito"}</span>
         </button>
       </div>
 

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, ChevronRight } from "lucide-react";
+import { ArrowLeft, ShoppingBag, ShieldCheck, Truck, ChevronRight, Flame } from "lucide-react";
 import AddToCartButton from "@/components/AddToCartButton";
 import { getProductById } from "@/app/actions/productActions";
 
@@ -76,8 +76,9 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
                   </span>
                 )}
                 {product.is_outlet && (
-                  <span className="bg-red-900/90 backdrop-blur-md border border-red-500/30 text-white text-xs uppercase font-bold tracking-widest px-4 py-2 rounded-full shadow-lg">
+                  <span className="bg-red-900/90 backdrop-blur-md border border-red-500/30 text-white text-xs uppercase font-bold tracking-widest px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5">
                     Outlet
+                    <Flame size={14} className="text-orange-400 animate-flame" />
                   </span>
                 )}
               </div>

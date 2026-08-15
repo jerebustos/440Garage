@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
-import { X, Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
+import { X, Trash2, Plus, Minus, ShoppingBag, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/store/useCartStore";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function CartDrawer() {
   const { 
@@ -12,8 +13,11 @@ export default function CartDrawer() {
     toggleDrawer, 
     removeItem, 
     updateQuantity, 
-    getCartTotal 
+    getCartTotal,
+    clearCart
   } = useCartStore();
+
+  const [orderSent, setOrderSent] = useState(false);
 
   const handleCheckout = () => {
     // Generate WhatsApp checkout message
@@ -25,9 +29,16 @@ export default function CartDrawer() {
     });
     message += `%0ATotal: $${getCartTotal().toLocaleString('es-AR')}`;
     
-    // You can replace this phone number with the actual business number
-    const whatsappUrl = `https://wa.me/5492954000000?text=${message}`;
-    window.open(whatsappUrl, "_blank");
+    const whatsappUrl = `https://wa.me/5492954396545?text=${message}`;
+    
+    setOrderSent(true);
+    
+    setTimeout(() => {
+      window.open(whatsappUrl, "_blank");
+      clearCart();
+      setOrderSent(false);
+      toggleDrawer(false);
+    }, 2000);
   };
 
   return (
@@ -65,9 +76,25 @@ export default function CartDrawer() {
               </button>
             </div>
 
-            {/* Items */}
+            {/* Items or Success Message */}
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
-              {items.length === 0 ? (
+              {orderSent ? (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center h-full text-center gap-4"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", damping: 15 }}
+                  >
+                    <CheckCircle size={64} className="text-emerald-500 mb-2" />
+                  </motion.div>
+                  <h3 className="text-2xl font-heading font-bold text-white uppercase tracking-widest">¡Pedido Preparado!</h3>
+                  <p className="text-slate-400">Redirigiendo a WhatsApp para finalizar la compra de forma segura...</p>
+                </motion.div>
+              ) : items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-4">
                   <ShoppingBag size={48} className="opacity-20" />
                   <p className="font-medium text-lg uppercase tracking-wider text-gold mb-2">¡Tu carrito está en silencio!</p>
@@ -132,7 +159,7 @@ export default function CartDrawer() {
             </div>
 
             {/* Footer */}
-            {items.length > 0 && (
+            {!orderSent && items.length > 0 && (
               <div className="p-6 bg-zinc-900 border-t border-white/10 mt-auto">
                 <div className="flex justify-between items-center mb-6">
                   <span className="text-slate-400 uppercase tracking-widest text-sm font-bold">Total</span>
