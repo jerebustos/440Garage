@@ -5,6 +5,12 @@ export interface Product {
   image_url: string;
   category: string;
   brand: string;
+  subcategory?: string;
+  stock?: number;
+  is_used?: boolean;
+  is_outlet?: boolean;
+  sku?: string;
+  description?: string;
 }
 
 export const mockProducts: Product[] = [

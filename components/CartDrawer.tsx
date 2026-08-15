@@ -75,8 +75,8 @@ export default function CartDrawer() {
                 </div>
               ) : (
                 items.map((item) => (
-                  <div key={item.id} className="flex gap-4 p-4 bg-slate-100 border border-black/5 rounded-lg group">
-                    <div className="relative w-24 h-24 bg-slate-200 rounded-md overflow-hidden shrink-0">
+                  <div key={item.id} className="flex gap-4 p-4 bg-white/5 border border-white/10 rounded-lg group hover:border-gold/30 transition-colors">
+                    <div className="relative w-24 h-24 bg-white rounded-md overflow-hidden shrink-0">
                       {item.imageUrl ? (
                         <Image
                           src={item.imageUrl}
@@ -92,25 +92,25 @@ export default function CartDrawer() {
                     
                     <div className="flex flex-col justify-between flex-1">
                       <div>
-                        <h3 className="text-foreground font-medium line-clamp-2 leading-tight">{item.name}</h3>
+                        <h3 className="text-white font-medium line-clamp-2 leading-tight">{item.name}</h3>
                         <p className="text-gold font-semibold mt-1">${item.price.toLocaleString('es-AR')}</p>
                       </div>
                       
                       <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center border border-black/20 rounded-md overflow-hidden">
+                        <div className="flex items-center border border-white/20 rounded-md overflow-hidden bg-white/5">
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="p-1 hover:bg-black/5 text-foreground transition-colors"
+                            className="p-1.5 hover:bg-white/10 text-white transition-colors"
                             aria-label="Disminuir cantidad"
                           >
                             <Minus size={16} />
                           </button>
-                          <span className="w-8 text-center text-sm font-medium text-foreground">
+                          <span className="w-8 text-center text-sm font-bold text-white">
                             {item.quantity}
                           </span>
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="p-1 hover:bg-black/5 text-foreground transition-colors"
+                            className="p-1.5 hover:bg-white/10 text-white transition-colors"
                             aria-label="Aumentar cantidad"
                           >
                             <Plus size={16} />
@@ -133,10 +133,10 @@ export default function CartDrawer() {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="p-6 bg-slate-100 border-t border-black/10 mt-auto">
+              <div className="p-6 bg-zinc-900 border-t border-white/10 mt-auto">
                 <div className="flex justify-between items-center mb-6">
-                  <span className="text-slate-500 uppercase tracking-widest text-sm font-bold">Total</span>
-                  <span className="text-3xl font-light text-foreground tracking-wider">${getCartTotal().toLocaleString('es-AR')}</span>
+                  <span className="text-slate-400 uppercase tracking-widest text-sm font-bold">Total</span>
+                  <span className="text-3xl font-light text-white tracking-wider">${getCartTotal().toLocaleString('es-AR')}</span>
                 </div>
                 <button 
                   onClick={handleCheckout}

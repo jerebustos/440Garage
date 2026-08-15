@@ -17,6 +17,21 @@ export async function getProducts() {
   return data;
 }
 
+export async function getProductById(id: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching product ${id}:`, error);
+    return null;
+  }
+  return data;
+}
+
 export async function saveProduct(productData: any) {
   // Usamos el cliente de admin para saltar las reglas de RLS temporalmente
   const supabase = await createAdminClient();

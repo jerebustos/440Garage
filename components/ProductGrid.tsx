@@ -1,12 +1,6 @@
 import React from "react";
 import ProductCard from "./ProductCard";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image_url: string;
-}
+import { Product } from "@/lib/data/products";
 
 export default function ProductGrid({ products }: { products: Product[] }) {
   if (!products || products.length === 0) {
@@ -38,6 +32,9 @@ export default function ProductGrid({ products }: { products: Product[] }) {
               name={product.name}
               price={product.price}
               imageUrl={product.image_url}
+              brand={product.brand}
+              is_used={product.is_used}
+              is_outlet={product.is_outlet}
             />
           ))}
         </div>

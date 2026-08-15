@@ -1,22 +1,23 @@
 import React from "react";
 import ProductCard from "@/components/ProductCard";
 import { getProducts } from "@/app/actions/productActions";
+import Image from "next/image";
 
 export default async function OutletPage() {
   const allProducts = await getProducts();
-  // TODO: Add an 'is_outlet' column in DB or filter appropriately. For now we use the first 3 products as a demo.
-  const products = allProducts.slice(0, 3);
+  const products = allProducts.filter((p: any) => p.is_outlet);
 
   return (
-    <div className="min-h-screen bg-background pt-32 pb-20">
-      <div className="mb-12 flex flex-col items-center text-center px-6">
-        <h1 className="text-4xl md:text-6xl font-heading font-bold text-foreground tracking-widest uppercase mb-6 drop-shadow-sm">
-          Outlet <span className="text-red-500">& Ofertas</span>
-        </h1>
-        <div className="w-24 h-1 bg-red-500 opacity-50"></div>
-        <p className="mt-8 max-w-2xl text-slate-300 font-light text-lg">
-          Oportunidades únicas. Productos nuevos con detalles estéticos o de exhibición a precios inmejorables.
-        </p>
+    <div className="min-h-screen bg-background pb-20">
+      <div className="w-full relative h-[30vh] md:h-[45vh] mb-12 pt-20">
+        <Image 
+          src="/banner-outlet.jpg" 
+          alt="Outlet y Ofertas" 
+          fill 
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
       </div>
       
       <div className="max-w-7xl mx-auto px-6">
@@ -28,6 +29,10 @@ export default async function OutletPage() {
               name={product.name}
               price={product.price}
               imageUrl={product.image_url}
+              brand={product.brand}
+              is_used={product.is_used}
+              is_outlet={product.is_outlet}
+              stock={product.stock}
             />
           ))}
         </div>

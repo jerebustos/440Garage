@@ -39,6 +39,9 @@ export async function POST(request: Request) {
       // Generar SKU si no viene en el excel (útil para empezar de cero)
       const sku = normalizedRow["sku"] || normalizedRow["código"] || `SKU-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
 
+      const isUsed = normalizedRow["usado"] || normalizedRow["is_used"] || false;
+      const isOutlet = normalizedRow["outlet"] || normalizedRow["oferta"] || normalizedRow["is_outlet"] || false;
+
       return {
         sku: sku.toString(),
         name: normalizedRow["nombre"] || normalizedRow["name"] || "Producto sin nombre",
@@ -49,6 +52,8 @@ export async function POST(request: Request) {
         category: normalizedRow["categoría"] || normalizedRow["categoria"] || normalizedRow["category"] || null,
         subcategory: normalizedRow["subcategoría"] || normalizedRow["subcategoria"] || normalizedRow["subcategory"] || null,
         brand: normalizedRow["marca"] || normalizedRow["brand"] || null,
+        is_used: isUsed === true || isUsed === "si" || isUsed === "sí" || isUsed === "true" || isUsed === 1,
+        is_outlet: isOutlet === true || isOutlet === "si" || isOutlet === "sí" || isOutlet === "true" || isOutlet === 1,
       };
     });
 

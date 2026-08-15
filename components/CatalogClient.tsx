@@ -12,13 +12,24 @@ interface CatalogClientProps {
 export default function CatalogClient({ products }: CatalogClientProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState("recommended");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
-  // Extract unique categories and brands
-  const categories = useMemo(() => Array.from(new Set(products.map((p) => p.category))), [products]);
-  const brands = useMemo(() => Array.from(new Set(products.map((p) => p.brand))), [products]);
+  // Extract unique categories, subcategories and brands
+  const categoryTree = useMemo(() => {
+    const tree: Record<string, Set<string>> = {};
+    products.forEach(p => {
+      if (p.category) {
+        if (!tree[p.category]) tree[p.category] = new Set();
+        if (p.subcategory) tree[p.category].add(p.subcategory);
+      }
+    });
+    return tree;
+  }, [products]);
+
+  const brands = useMemo(() => Array.from(new Set(products.map((p) => p.brand).filter(Boolean))), [products]);
 
   // Read URL params on mount (e.g. ?categoria=bateria)
   useEffect(() => {
@@ -38,6 +49,9 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     if (selectedCategory) {
       result = result.filter((p) => p.category === selectedCategory);
     }
+    if (selectedSubcategory) {
+      result = result.filter((p) => p.subcategory === selectedSubcategory);
+    }
     if (selectedBrand) {
       result = result.filter((p) => p.brand === selectedBrand);
     }
@@ -49,10 +63,11 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     }
 
     return result;
-  }, [products, searchTerm, selectedCategory, selectedBrand, sortBy]);
+  }, [products, searchTerm, selectedCategory, selectedSubcategory, selectedBrand, sortBy]);
 
   const clearFilters = () => {
     setSelectedCategory(null);
+    setSelectedSubcategory(null);
     setSelectedBrand(null);
     setSearchTerm("");
     // Limpiar URL si es necesario
@@ -77,18 +92,66 @@ export default function CatalogClient({ products }: CatalogClientProps) {
 
       <div>
         <h4 className="text-slate-200 font-semibold mb-3">Categorías</h4>
-        <div className="flex flex-col gap-2">
-          {categories.map((cat) => (
-            <label key={cat} className="flex items-center gap-3 text-slate-400 hover:text-white cursor-pointer transition-colors">
-              <input 
-                type="radio" 
-                name="category"
-                checked={selectedCategory === cat}
-                onChange={() => setSelectedCategory(cat)}
-                className="w-4 h-4 accent-gold"
-              />
-              <span className="capitalize">{cat.replace("-", " ")}</span>
-            </label>
+        <div className="flex flex-col gap-3">
+          {Object.entries(categoryTree).map(([cat, subcats]) => (
+            <div key={cat} className="flex flex-col gap-1">
+              <label className="flex items-center gap-3 text-slate-400 hover:text-white cursor-pointer transition-colors">
+                <input 
+                  type="radio" 
+                  name="category"
+                  checked={selectedCategory === cat}
+                  onChange={() => {
+                    if (selectedCategory === cat) {
+                      // Allow unselecting category by clicking it again
+                      setSelectedCategory(null);
+                      setSelectedSubcategory(null);
+                    } else {
+                      setSelectedCategory(cat);
+                      setSelectedSubcategory(null);
+                    }
+                  }}
+                  // Fix Next.js warning by using onClick instead of onChange for toggle ability on radios, or just a custom button.
+                  // But standard radio works for selection. For toggle, we can just use the click handler.
+                  onClick={(e) => {
+                    if (selectedCategory === cat) {
+                      e.preventDefault();
+                      setSelectedCategory(null);
+                      setSelectedSubcategory(null);
+                    }
+                  }}
+                  className="w-4 h-4 accent-gold"
+                />
+                <span className={`capitalize ${selectedCategory === cat ? 'text-white font-medium' : ''}`}>
+                  {cat.replace("-", " ")}
+                </span>
+              </label>
+
+              {/* Subcategorías */}
+              {selectedCategory === cat && Array.from(subcats).length > 0 && (
+                <div className="ml-7 flex flex-col gap-2 mt-2 border-l-2 border-white/5 pl-4">
+                  {Array.from(subcats).map(sub => (
+                    <label key={sub} className="flex items-center gap-2 text-slate-500 hover:text-slate-300 cursor-pointer transition-colors text-sm">
+                      <input 
+                        type="radio" 
+                        name="subcategory"
+                        checked={selectedSubcategory === sub}
+                        onChange={() => setSelectedSubcategory(sub)}
+                        onClick={(e) => {
+                          if (selectedSubcategory === sub) {
+                            e.preventDefault();
+                            setSelectedSubcategory(null);
+                          }
+                        }}
+                        className="w-3.5 h-3.5 accent-gold"
+                      />
+                      <span className={`${selectedSubcategory === sub ? 'text-gold font-medium' : ''}`}>
+                        {sub}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </div>
@@ -98,13 +161,19 @@ export default function CatalogClient({ products }: CatalogClientProps) {
         <div className="flex flex-col gap-2">
           {brands.map((brand) => (
             <label key={brand} className="flex items-center gap-3 text-slate-400 hover:text-white cursor-pointer transition-colors">
-              <input 
-                type="radio" 
-                name="brand"
-                checked={selectedBrand === brand}
-                onChange={() => setSelectedBrand(brand)}
-                className="w-4 h-4 accent-gold"
-              />
+                <input 
+                  type="radio" 
+                  name="brand"
+                  checked={selectedBrand === brand}
+                  onChange={() => setSelectedBrand(brand)}
+                  onClick={(e) => {
+                    if (selectedBrand === brand) {
+                      e.preventDefault();
+                      setSelectedBrand(null);
+                    }
+                  }}
+                  className="w-4 h-4 accent-gold"
+                />
               <span>{brand}</span>
             </label>
           ))}
@@ -186,6 +255,10 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                 name={product.name}
                 price={product.price}
                 imageUrl={product.image_url}
+                brand={product.brand}
+                is_used={product.is_used}
+                is_outlet={product.is_outlet}
+                stock={product.stock}
               />
             ))}
           </div>

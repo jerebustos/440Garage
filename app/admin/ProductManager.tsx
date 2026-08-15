@@ -37,6 +37,8 @@ export default function ProductManager() {
     sku: "",
     description: "",
     image_url: "",
+    is_used: false,
+    is_outlet: false,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -65,12 +67,15 @@ export default function ProductManager() {
         sku: product.sku || "",
         description: product.description || "",
         image_url: product.image_url || "",
+        is_used: !!product.is_used,
+        is_outlet: !!product.is_outlet,
       });
     } else {
       setEditingProduct(null);
       setFormData({
         name: "", brand: "", category: "", subcategory: "",
         price: 0, stock: 0, sku: "", description: "", image_url: "",
+        is_used: false, is_outlet: false,
       });
     }
     setImageFile(null);
@@ -176,7 +181,7 @@ export default function ProductManager() {
                   <td className="px-4 py-3">
                     {product.image_url ? (
                       <div className="relative w-12 h-12 rounded overflow-hidden bg-black/50 border border-white/10">
-                        <Image src={product.image_url} alt={product.name} fill className="object-cover" />
+                        <Image src={product.image_url} alt={product.name} fill sizes="48px" className="object-cover" />
                       </div>
                     ) : (
                       <div className="w-12 h-12 rounded bg-black/50 border border-white/10 flex items-center justify-center text-slate-600">
@@ -322,6 +327,34 @@ export default function ProductManager() {
                       className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2.5 text-slate-300 font-mono text-sm focus:border-gold outline-none transition-colors" 
                     />
                   </div>
+
+                  <div className="flex gap-6 mt-2 bg-black/30 p-4 rounded-lg border border-white/5">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative flex items-center justify-center">
+                        <input 
+                          type="checkbox" 
+                          checked={formData.is_used} 
+                          onChange={(e) => setFormData({...formData, is_used: e.target.checked})}
+                          className="w-5 h-5 appearance-none border-2 border-slate-600 rounded bg-black/50 checked:bg-gold checked:border-gold transition-colors"
+                        />
+                        {formData.is_used && <div className="absolute w-2 h-3 border-r-2 border-b-2 border-black rotate-45 -mt-1"></div>}
+                      </div>
+                      <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Instrumento Usado</span>
+                    </label>
+
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative flex items-center justify-center">
+                        <input 
+                          type="checkbox" 
+                          checked={formData.is_outlet} 
+                          onChange={(e) => setFormData({...formData, is_outlet: e.target.checked})}
+                          className="w-5 h-5 appearance-none border-2 border-slate-600 rounded bg-black/50 checked:bg-gold checked:border-gold transition-colors"
+                        />
+                        {formData.is_outlet && <div className="absolute w-2 h-3 border-r-2 border-b-2 border-black rotate-45 -mt-1"></div>}
+                      </div>
+                      <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">En Outlet / Oferta</span>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Columna 2: Foto y Descripción */}
@@ -344,13 +377,13 @@ export default function ProductManager() {
                       {imageFile ? (
                         <div className="absolute inset-0 p-2">
                           <div className="relative w-full h-full rounded-lg overflow-hidden border border-gold/50">
-                            <Image src={URL.createObjectURL(imageFile)} alt="Preview" fill className="object-cover" />
+                            <Image src={URL.createObjectURL(imageFile)} alt="Preview" fill sizes="200px" className="object-cover" />
                           </div>
                         </div>
                       ) : formData.image_url ? (
                         <div className="absolute inset-0 p-2">
                           <div className="relative w-full h-full rounded-lg overflow-hidden border border-white/20 group-hover:opacity-50 transition-opacity">
-                            <Image src={formData.image_url} alt="Current" fill className="object-cover" />
+                            <Image src={formData.image_url} alt="Current" fill sizes="200px" className="object-cover" />
                           </div>
                           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                             <span className="bg-black/80 text-white text-xs px-3 py-1.5 rounded font-medium">Cambiar Foto</span>

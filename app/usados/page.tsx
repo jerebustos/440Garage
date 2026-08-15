@@ -1,21 +1,22 @@
 import ProductCard from "@/components/ProductCard";
 import { getProducts } from "@/app/actions/productActions";
+import Image from "next/image";
 
 export default async function UsadosPage() {
   const allProducts = await getProducts();
-  // TODO: Add an 'is_used' column in DB or filter appropriately. For now we use the first 3 products as a demo.
-  const products = allProducts.slice(0, 3);
+  const products = allProducts.filter((p: any) => p.is_used);
 
   return (
-    <div className="min-h-screen bg-background pt-32 pb-20">
-      <div className="mb-12 flex flex-col items-center text-center px-6">
-        <h1 className="text-4xl md:text-6xl font-heading font-bold text-foreground tracking-widest uppercase mb-6 drop-shadow-sm">
-          Instrumentos <span className="text-emerald-500">Usados</span>
-        </h1>
-        <div className="w-24 h-1 bg-emerald-500 opacity-50"></div>
-        <p className="mt-8 max-w-2xl text-slate-300 font-light text-lg">
-          Equipos con historia. Cada instrumento usado es revisado y calibrado por nuestro luthier. Garantía de 6 meses en todos los productos.
-        </p>
+    <div className="min-h-screen bg-background pb-20">
+      <div className="w-full relative h-[30vh] md:h-[45vh] mb-12 pt-20">
+        <Image 
+          src="/banner-usados.jpg" 
+          alt="Instrumentos Usados" 
+          fill 
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
       </div>
       
       <div className="max-w-7xl mx-auto px-6">
@@ -27,6 +28,10 @@ export default async function UsadosPage() {
               name={product.name}
               price={product.price}
               imageUrl={product.image_url}
+              brand={product.brand}
+              is_used={product.is_used}
+              is_outlet={product.is_outlet}
+              stock={product.stock}
             />
           ))}
         </div>

@@ -3,10 +3,11 @@
 import React, { useState } from "react";
 import ExcelImporter from "./ExcelImporter";
 import ProductManager from "./ProductManager";
-import { Database, FileSpreadsheet } from "lucide-react";
+import EventManager from "./EventManager";
+import { Database, FileSpreadsheet, Calendar } from "lucide-react";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<'catalog' | 'import'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'import' | 'events'>('catalog');
 
   return (
     <div className="min-h-screen bg-zinc-950 pt-32 pb-20">
@@ -17,37 +18,50 @@ export default function AdminPage() {
               Panel de <span className="text-gold">Administración</span>
             </h1>
             <p className="text-slate-400 font-light text-lg">
-              Gestioná tus productos y actualizá el stock.
+              Gestioná tus productos, inventario y eventos de la comunidad.
             </p>
           </div>
 
-          <div className="flex bg-white/5 border border-white/10 p-1 rounded-xl">
+          <div className="flex flex-wrap bg-white/5 border border-white/10 p-1 rounded-xl">
             <button
               onClick={() => setActiveTab('catalog')}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium tracking-wide transition-colors ${
+              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium tracking-wide transition-colors ${
                 activeTab === 'catalog' 
                   ? 'bg-gold text-black' 
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <Database size={16} />
-              Catálogo
+              <span className="hidden sm:inline">Catálogo</span>
             </button>
             <button
               onClick={() => setActiveTab('import')}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium tracking-wide transition-colors ${
+              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium tracking-wide transition-colors ${
                 activeTab === 'import' 
                   ? 'bg-gold text-black' 
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <FileSpreadsheet size={16} />
-              Importación Excel
+              <span className="hidden sm:inline">Importar</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('events')}
+              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium tracking-wide transition-colors ${
+                activeTab === 'events' 
+                  ? 'bg-gold text-black' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Calendar size={16} />
+              <span className="hidden sm:inline">Eventos</span>
             </button>
           </div>
         </div>
 
-        {activeTab === 'catalog' ? <ProductManager /> : <ExcelImporter />}
+        {activeTab === 'catalog' && <ProductManager />}
+        {activeTab === 'import' && <ExcelImporter />}
+        {activeTab === 'events' && <EventManager />}
       </div>
     </div>
   );
