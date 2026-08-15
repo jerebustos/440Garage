@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@react-email/components": "^1.0.12",
     "@studio-freight/react-lenis": "^0.0.47",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.2",
@@ -19,7 +20,10 @@
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "react-email": "^6.9.2",
+    "resend": "^6.20.0",
     "xlsx": "^0.18.5",
+    "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
   "devDependencies": {

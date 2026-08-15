@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { LayoutDashboard, LogOut, Database, FileSpreadsheet, Calendar } from "lucide-react";
+import { LayoutDashboard, LogOut, Database, FileSpreadsheet, Calendar, Package } from "lucide-react";
 import ExcelImporter from "./ExcelImporter";
 import ProductManager from "./ProductManager";
 import EventManager from "./EventManager";
+import OrderManager from "./OrderManager";
 import { logout } from "@/app/actions/authActions";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<'catalog' | 'import' | 'events'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'import' | 'events' | 'orders'>('catalog');
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -82,12 +83,24 @@ export default function AdminPage() {
               <Calendar size={16} />
               <span className="hidden sm:inline">Eventos</span>
             </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium tracking-wide transition-colors ${
+                activeTab === 'orders' 
+                  ? 'bg-gold text-black' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Package size={16} />
+              <span className="hidden sm:inline">Pedidos</span>
+            </button>
           </div>
         </div>
 
         {activeTab === 'catalog' && <ProductManager />}
         {activeTab === 'import' && <ExcelImporter />}
         {activeTab === 'events' && <EventManager />}
+        {activeTab === 'orders' && <OrderManager />}
       </div>
     </div>
   );

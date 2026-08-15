@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Check, Flame } from "lucide-react";
+import { ShoppingCart, Check, Flame, Heart } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
+import { useFavoriteStore } from "@/store/useFavoriteStore";
 
 interface ProductCardProps {
   id: string;
@@ -21,6 +22,13 @@ export default function ProductCard({ id, name, price, imageUrl, brand, is_used,
   const [imgError, setImgError] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const { addItem } = useCartStore();
+  const { favorites, fetchFavorites, toggleFavorite } = useFavoriteStore();
+  
+  React.useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
+
+  const isFavorite = favorites.includes(id);
 
   return (
     <motion.div 
@@ -47,6 +55,18 @@ export default function ProductCard({ id, name, price, imageUrl, brand, is_used,
           </span>
         )}
       </div>
+
+      {/* Favorite Button */}
+      <button 
+        onClick={(e) => {
+          e.preventDefault();
+          toggleFavorite(id);
+        }}
+        className="absolute top-4 right-4 z-40 p-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white hover:bg-white/10 hover:text-gold transition-all duration-300"
+        aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+      >
+        <Heart size={18} className={isFavorite ? "fill-gold text-gold" : ""} />
+      </button>
 
       {/* Image Container (White Background for Product Cutouts) */}
       <div className="relative h-[280px] sm:h-[320px] w-full bg-white overflow-hidden flex items-center justify-center">

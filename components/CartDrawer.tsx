@@ -4,6 +4,8 @@ import { X, Trash2, Plus, Minus, ShoppingBag, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/store/useCartStore";
 import Image from "next/image";
+import { sendQuoteEmail } from "@/app/actions/emailActions";
+import { createOrder } from "@/app/actions/orderActions";
 import { useState } from "react";
 
 export default function CartDrawer() {
@@ -18,16 +20,21 @@ export default function CartDrawer() {
   } = useCartStore();
 
   const [orderSent, setOrderSent] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const total = getCartTotal();
 
-  const handleCheckout = () => {
-    // Generate WhatsApp checkout message
+  const handleWhatsAppCheckout = async () => {
     if (items.length === 0) return;
     
+    // Save to DB (si falla, ignoramos para no frenar la comunicación por WhatsApp)
+    await createOrder(total, "whatsapp", items);
+
+    // Generate WhatsApp checkout message
     let message = "Hola Garage 440! Me gustaría comprar los siguientes artículos:%0A%0A";
     items.forEach(item => {
       message += `- ${item.name} (${item.quantity}x) - $${(item.price * item.quantity).toLocaleString('es-AR')}%0A`;
     });
-    message += `%0ATotal: $${getCartTotal().toLocaleString('es-AR')}`;
+    message += `%0ATotal: $${total.toLocaleString('es-AR')}`;
     
     const whatsappUrl = `https://wa.me/5492954396545?text=${message}`;
     
@@ -39,6 +46,29 @@ export default function CartDrawer() {
       setOrderSent(false);
       toggleDrawer(false);
     }, 2000);
+  };
+
+  const handleEmailQuote = async () => {
+    setIsSendingEmail(true);
+    
+    // Guardar en DB (opcional, no frenamos si falla)
+    await createOrder(total, "email", items);
+
+    const email = prompt("Por favor, ingresá tu email para enviarte la cotización:");
+    if (!email) {
+      setIsSendingEmail(false);
+      return;
+    }
+    
+    const res = await sendQuoteEmail(items, total, email);
+    if (res.success) {
+      alert("Cotización enviada exitosamente a tu correo.");
+      clearCart();
+      toggleDrawer(false);
+    } else {
+      alert("Hubo un error al enviar el correo: " + res.error);
+    }
+    setIsSendingEmail(false);
   };
 
   return (
@@ -165,14 +195,23 @@ export default function CartDrawer() {
                   <span className="text-slate-400 uppercase tracking-widest text-sm font-bold">Total</span>
                   <span className="text-3xl font-light text-white tracking-wider">${getCartTotal().toLocaleString('es-AR')}</span>
                 </div>
-                <button 
-                  onClick={handleCheckout}
-                  className="w-full bg-gold text-black uppercase font-bold tracking-widest py-4 px-8 hover:bg-yellow-500 transition-colors rounded-none"
-                >
-                  Finalizar Compra
-                </button>
+                <div className="flex flex-col gap-3">
+                  <button 
+                    onClick={handleWhatsAppCheckout}
+                    className="w-full bg-[#25D366] text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-[#1EBE5D] transition-colors"
+                  >
+                    Pedir por WhatsApp
+                  </button>
+                  <button 
+                    onClick={handleEmailQuote}
+                    disabled={isSendingEmail}
+                    className="w-full bg-white/5 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-white/10 transition-colors border border-white/10 disabled:opacity-50"
+                  >
+                    {isSendingEmail ? "Enviando..." : "Solicitar Cotización por Email"}
+                  </button>
+                </div>
                 <p className="text-center text-xs text-slate-500 mt-4 font-medium uppercase tracking-widest">
-                  Continuarás tu compra por WhatsApp
+                  Elige tu método de contacto preferido
                 </p>
               </div>
             )}

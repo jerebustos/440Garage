@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { eventSchema } from "@/lib/validations";
 
 export async function getEvents() {
   const supabase = await createClient();
@@ -20,9 +21,14 @@ export async function getEvents() {
 export async function saveEvent(eventData: Record<string, unknown>) {
   const supabase = await createAdminClient();
   
+  const parsed = eventSchema.safeParse(eventData);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message || "Datos inválidos" };
+  }
+
   const { data, error } = await supabase
     .from("events")
-    .upsert(eventData, { onConflict: "id" })
+    .upsert(parsed.data, { onConflict: "id" })
     .select()
     .single();
 

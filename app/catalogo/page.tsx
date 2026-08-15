@@ -3,8 +3,15 @@ import CatalogClient from "@/components/CatalogClient";
 import { getProducts } from "@/app/actions/productActions";
 import Image from "next/image";
 
-export default async function CatalogoPage() {
-  const products = await getProducts();
+export default async function CatalogoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedSearchParams = await searchParams;
+  const q = typeof resolvedSearchParams.q === "string" ? resolvedSearchParams.q : undefined;
+  
+  const products = await getProducts(undefined, q);
   
   return (
     <div className="min-h-screen bg-background pb-20">

@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { productSchema } from "@/lib/validations";
 
 // Cliente público sin acceso a cookies para permitir el caché estático
 const getPublicClient = () => {
@@ -12,15 +13,20 @@ const getPublicClient = () => {
   );
 };
 
-// Obtenemos los productos de Supabase, pero lo cacheamos
 export const getProducts = unstable_cache(
-  async () => {
+  async (category?: string, searchQuery?: string) => {
     const supabase = getPublicClient();
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
+    let query = supabase.from("products").select("*").order("created_at", { ascending: false });
+    
+    if (category) {
+      query = query.eq("category", category);
+    }
 
+    if (searchQuery) {
+      query = query.ilike("name", `%${searchQuery}%`);
+    }
+
+    const { data, error } = await query;
     if (error) {
       console.error("Error fetching products:", error);
       return [];
@@ -57,14 +63,22 @@ export async function saveProduct(productData: Record<string, unknown>) {
   // Usamos el cliente de admin para saltar las reglas de RLS temporalmente
   const supabase = await createAdminClient();
   
+  // Validación Zod
+  const parsed = productSchema.safeParse(productData);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message || "Datos inválidos" };
+  }
+  
+  const validData = parsed.data;
+
   // Si no tiene id, es uno nuevo, generamos SKU si hace falta
-  if (!productData.id && !productData.sku) {
-    productData.sku = `SKU-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+  if (!validData.id && !validData.sku) {
+    validData.sku = `SKU-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
   }
 
   const { data, error } = await supabase
     .from("products")
-    .upsert(productData, { onConflict: "id" })
+    .upsert(validData, { onConflict: "id" })
     .select()
     .single();
 
