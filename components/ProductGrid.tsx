@@ -1,6 +1,6 @@
 import React from "react";
 import ProductCard from "./ProductCard";
-import { Product } from "@/lib/data/products";
+
 
 export default function ProductGrid({ products }: { products: Product[] }) {
   if (!products || products.length === 0) {
@@ -42,3 +42,4 @@ export default function ProductGrid({ products }: { products: Product[] }) {
     </section>
   );
 }
+import { Product } from '@/lib/types';

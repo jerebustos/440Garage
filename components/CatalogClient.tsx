@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import ProductCard from "./ProductCard";
-import { Product } from "@/lib/data/products";
+
 import { useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal, X, Music } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -168,7 +168,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
                   type="radio" 
                   name="brand"
                   checked={selectedBrand === brand}
-                  onChange={() => setSelectedBrand(brand)}
+                  onChange={() => setSelectedBrand(brand || null)}
                   onClick={(e) => {
                     if (selectedBrand === brand) {
                       e.preventDefault();
@@ -309,3 +309,4 @@ export default function CatalogClient({ products }: CatalogClientProps) {
     </div>
   );
 }
+import { Product } from '@/lib/types';

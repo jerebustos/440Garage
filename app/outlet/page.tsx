@@ -2,7 +2,7 @@ import React from "react";
 import ProductCard from "@/components/ProductCard";
 import { getProducts } from "@/app/actions/productActions";
 import Image from "next/image";
-import { Product } from "@/lib/data/products";
+
 
 export default async function OutletPage() {
   const allProducts = await getProducts();
@@ -41,3 +41,4 @@ export default async function OutletPage() {
     </div>
   );
 }
+import { Product } from '@/lib/types';

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { getProducts, saveProduct, uploadProductImage, deleteProduct } from "@/app/actions/productActions";
 import { Plus, Edit2, Trash2, Image as ImageIcon, Loader2, X } from "lucide-react";
 import Image from "next/image";
-import { Product } from "@/lib/data/products";
+
 
 const INSTRUMENT_CATEGORIES: Record<string, string[]> = {
   "Instrumentos de Cuerda": ["Guitarras Eléctricas", "Guitarras Acústicas", "Bajos", "Ukeleles", "Violines"],
@@ -434,3 +434,4 @@ export default function ProductManager() {
     </div>
   );
 }
+import { Product } from '@/lib/types';
