@@ -31,7 +31,7 @@ export default function Header({ forceSolid = false }: HeaderProps) {
     const checkAdmin = async () => {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.email === 'jerebustos20@gmail.com') {
+      if (session?.user?.email === 'admin@440garage.com' || session?.user?.email === 'jerebustos20@gmail.com') {
         setProfileUrl("/admin");
       }
     };
