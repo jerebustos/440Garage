@@ -83,3 +83,29 @@ export async function updateOrderStatus(orderId: string, status: string) {
     return { success: false, error: error.message };
   }
 }
+
+export async function deleteOrder(orderId: string) {
+  try {
+    const authClient = await createClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) return { success: false, error: "No autorizado" };
+
+    const supabase = await createAdminClient();
+    
+    // Al borrar la orden, los order_items se borrarán en cascada si está configurado en supabase (ON DELETE CASCADE)
+    // Si no, podemos forzar el borrado de order_items primero
+    await supabase.from("order_items").delete().eq("order_id", orderId);
+    
+    const { error } = await supabase
+      .from("orders")
+      .delete()
+      .eq("id", orderId);
+
+    if (error) throw error;
+
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

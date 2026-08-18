@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAllOrders, updateOrderStatus } from "@/app/actions/adminOrderActions";
-import { ChevronDown, ChevronUp, Package, Clock, CheckCircle, XCircle, User, Mail, Phone, MapPin } from "lucide-react";
+import { getAllOrders, updateOrderStatus, deleteOrder } from "@/app/actions/adminOrderActions";
+import { ChevronDown, ChevronUp, Package, Clock, CheckCircle, XCircle, User, Mail, Phone, MapPin, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function OrderManager() {
@@ -29,6 +29,18 @@ export default function OrderManager() {
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
     } else {
       alert("Error al actualizar el estado");
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (confirm("¿Estás seguro de que querés ELIMINAR este pedido por completo? Esta acción no se puede deshacer.")) {
+      const res = await deleteOrder(orderId);
+      if (res.success) {
+        setOrders(orders.filter(o => o.id !== orderId));
+        setExpandedOrderId(null);
+      } else {
+        alert("Error al eliminar el pedido: " + res.error);
+      }
     }
   };
 
@@ -168,6 +180,15 @@ export default function OrderManager() {
                                 className={`px-3 py-1.5 rounded text-xs font-bold uppercase transition-colors ${order.status === 'cancelado' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}
                               >
                                 Cancelar
+                              </button>
+                            </div>
+                            
+                            <div className="mt-4 pt-4 border-t border-white/5 flex justify-end">
+                              <button
+                                onClick={() => handleDeleteOrder(order.id)}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold text-red-400 hover:text-white hover:bg-red-500 transition-colors"
+                              >
+                                <Trash2 size={14} /> Eliminar Pedido
                               </button>
                             </div>
                           </div>

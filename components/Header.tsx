@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCartStore } from "@/store/useCartStore";
 import CartDrawer from "./CartDrawer";
+import { createClient } from "@/lib/supabase/client";
 
 interface HeaderProps {
   forceSolid?: boolean;
@@ -23,9 +24,18 @@ export default function Header({ forceSolid = false }: HeaderProps) {
   // Zustand store
   const { getCartCount, toggleDrawer } = useCartStore();
   const [mounted, setMounted] = useState(false);
+  const [profileUrl, setProfileUrl] = useState("/perfil");
 
   useEffect(() => {
     setTimeout(() => setMounted(true), 0);
+    const checkAdmin = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email === 'jerebustos20@gmail.com') {
+        setProfileUrl("/admin");
+      }
+    };
+    checkAdmin();
   }, []);
 
   useEffect(() => {
@@ -123,7 +133,7 @@ export default function Header({ forceSolid = false }: HeaderProps) {
             Contacto
             <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gold transition-all duration-300 ease-out group-hover:w-full"></span>
           </Link>
-          <Link href="/perfil" aria-label="Mi Perfil" className="hover:text-gold transition-colors">
+          <Link href={profileUrl} aria-label="Mi Perfil" className="hover:text-gold transition-colors">
             <User size={24} />
           </Link>
 
