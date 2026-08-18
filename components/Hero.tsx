@@ -8,7 +8,6 @@ export default function Hero() {
       <video
         className="absolute top-0 left-0 w-full h-full object-cover opacity-60"
         src="/hero-video.mp4"
-        poster="/hero-poster.jpg"
         autoPlay
         loop
         muted
