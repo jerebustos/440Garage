@@ -2,15 +2,17 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import * as xlsx from "xlsx";
 
+import { checkIsAdmin } from "@/app/actions/authActions";
+
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
     
     // Check auth, verify user is admin
-    const { data: { user } } = await supabase.auth.getUser();
+    const isAdmin = await checkIsAdmin();
     
-    if (!user) {
-      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    if (!isAdmin) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 403 });
     }
 
     // Parse formData to get the Excel file

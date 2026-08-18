@@ -70,7 +70,7 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
       {/* Añadir script JSON-LD */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Breadcrumb */}

@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import * as xlsx from "xlsx";
 
+import { checkIsAdmin } from "@/app/actions/authActions";
+
 export async function POST(request: Request) {
   try {
-    // Verificar autenticación
-    const authClient = await createClient();
-    const { data: { user } } = await authClient.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    // Verificar autenticación y autorización
+    const isAdmin = await checkIsAdmin();
+    if (!isAdmin) {
+      return NextResponse.json({ error: "No autorizado. Se requiere nivel de administrador." }, { status: 403 });
     }
 
     const supabase = await createAdminClient();

@@ -8,14 +8,46 @@ export async function createOrder(totalAmount: number, contactMethod: string, it
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Permitimos que continúe aunque no haya user (fallará por RLS, pero no bloquea el frontend)
+    // 0. Recalcular precios desde la base de datos (seguridad)
+    // Extraer los IDs de los productos solicitados
+    const productIds = items.map(item => item.id);
     
+    // Buscar los precios reales en la base de datos
+    const { data: realProducts, error: productsError } = await supabase
+      .from("products")
+      .select("id, price, stock")
+      .in("id", productIds);
+
+    if (productsError || !realProducts) {
+      throw new Error("Error al verificar los productos del catálogo.");
+    }
+
+    // Calcular el total real basado en los precios de la BD
+    let realTotalAmount = 0;
+    const orderItemsToInsert = [];
+
+    for (const item of items) {
+      const realProduct = realProducts.find(p => p.id === item.id);
+      if (!realProduct) {
+        throw new Error(`Producto no encontrado (ID: ${item.id})`);
+      }
+      
+      // Multiplicar cantidad por el precio real
+      realTotalAmount += realProduct.price * item.quantity;
+
+      orderItemsToInsert.push({
+        product_id: item.id,
+        quantity: item.quantity,
+        price_at_purchase: realProduct.price // Usar precio real, NUNCA el del cliente
+      });
+    }
+
     // 1. Insertar la orden
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         user_id: user?.id || null,
-        total_amount: totalAmount,
+        total_amount: realTotalAmount,
         contact_method: contactMethod,
         status: "pendiente"
       })
@@ -24,17 +56,15 @@ export async function createOrder(totalAmount: number, contactMethod: string, it
 
     if (orderError) throw orderError;
 
-    // 2. Insertar los items
-    const orderItems = items.map(item => ({
-      order_id: order.id,
-      product_id: item.id,
-      quantity: item.quantity,
-      price_at_purchase: item.price
+    // 2. Insertar los items asignando el ID de la orden
+    const finalOrderItems = orderItemsToInsert.map(item => ({
+      ...item,
+      order_id: order.id
     }));
 
     const { error: itemsError } = await supabase
       .from("order_items")
-      .insert(orderItems);
+      .insert(finalOrderItems);
 
     if (itemsError) throw itemsError;
 
