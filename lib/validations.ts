@@ -19,7 +19,7 @@ export const eventSchema = z.object({
   title: z.string().min(3, "El título debe tener al menos 3 caracteres").max(255),
   description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
   event_date: z.string().min(1, "La fecha es requerida"),
-  event_time: z.string().optional(),
+  time: z.string().min(1, "El horario es requerido"),
   location: z.string().min(1, "La ubicación es requerida"),
   image_url: z.string().url("URL de imagen inválida").optional().or(z.literal("")),
   is_active: z.boolean().default(true),
