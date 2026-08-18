@@ -4,6 +4,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { productSchema } from "@/lib/validations";
+import { checkIsAdmin } from "@/app/actions/authActions";
 
 // Cliente público sin acceso a cookies para permitir el caché estático
 const getPublicClient = () => {
@@ -54,10 +55,9 @@ export async function getProductById(id: string) {
 
 export async function saveProduct(productData: Record<string, unknown>) {
   // Verificar autenticación primero
-  const authClient = await createClient();
-  const { data: { user } } = await authClient.auth.getUser();
-  if (!user) {
-    return { success: false, error: "No autorizado. Debes iniciar sesión." };
+  const isAdmin = await checkIsAdmin();
+  if (!isAdmin) {
+    return { success: false, error: "No autorizado. Debes ser administrador." };
   }
 
   // Usamos el cliente de admin para saltar las reglas de RLS temporalmente
@@ -96,9 +96,10 @@ export async function saveProduct(productData: Record<string, unknown>) {
 export async function uploadProductImage(formData: FormData) {
   try {
     // Verificar autenticación
-    const authClient = await createClient();
-    const { data: { user } } = await authClient.auth.getUser();
-    if (!user) return { success: false, error: "No autorizado." };
+    const isAdmin = await checkIsAdmin();
+    if (!isAdmin) {
+      return { success: false, error: "No autorizado. Debes ser administrador." };
+    }
 
     const file = formData.get("file") as File;
     if (!file) return { success: false, error: "No file provided" };
@@ -136,9 +137,10 @@ export async function uploadProductImage(formData: FormData) {
 
 export async function deleteProduct(id: string) {
   // Verificar autenticación
-  const authClient = await createClient();
-  const { data: { user } } = await authClient.auth.getUser();
-  if (!user) return { success: false, error: "No autorizado." };
+  const isAdmin = await checkIsAdmin();
+  if (!isAdmin) {
+    return { success: false, error: "No autorizado. Debes ser administrador." };
+  }
 
   const supabase = await createAdminClient();
   const { error } = await supabase.from("products").delete().eq("id", id);

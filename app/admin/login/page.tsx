@@ -1,13 +1,20 @@
 import LoginForm from "@/components/LoginForm";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { checkIsAdmin } from "@/app/actions/authActions";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Acceso Administrativo | Garage 440",
   description: "Iniciar sesión en el panel de control",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const isAdmin = await checkIsAdmin();
+  if (isAdmin) {
+    redirect("/admin");
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background decorations */}

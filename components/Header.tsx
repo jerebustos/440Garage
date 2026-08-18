@@ -8,7 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCartStore } from "@/store/useCartStore";
 import CartDrawer from "./CartDrawer";
-import { createClient } from "@/lib/supabase/client";
+import { checkIsAdmin } from "@/app/actions/authActions";
 
 interface HeaderProps {
   forceSolid?: boolean;
@@ -28,14 +28,13 @@ export default function Header({ forceSolid = false }: HeaderProps) {
 
   useEffect(() => {
     setTimeout(() => setMounted(true), 0);
-    const checkAdmin = async () => {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.email === 'admin@440garage.com' || session?.user?.email === 'jerebustos20@gmail.com') {
+    const verifyAdmin = async () => {
+      const isAdmin = await checkIsAdmin();
+      if (isAdmin) {
         setProfileUrl("/admin");
       }
     };
-    checkAdmin();
+    verifyAdmin();
   }, []);
 
   useEffect(() => {

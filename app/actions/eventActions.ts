@@ -4,6 +4,8 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { eventSchema } from "@/lib/validations";
 
+import { checkIsAdmin } from "@/app/actions/authActions";
+
 export async function getEvents() {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -19,6 +21,11 @@ export async function getEvents() {
 }
 
 export async function saveEvent(eventData: Record<string, unknown>) {
+  const isAdmin = await checkIsAdmin();
+  if (!isAdmin) {
+    return { success: false, error: "No autorizado. Debes ser administrador." };
+  }
+
   const supabase = await createAdminClient();
   
   const parsed = eventSchema.safeParse(eventData);
@@ -44,6 +51,11 @@ export async function saveEvent(eventData: Record<string, unknown>) {
 }
 
 export async function deleteEvent(id: string) {
+  const isAdmin = await checkIsAdmin();
+  if (!isAdmin) {
+    return { success: false, error: "No autorizado. Debes ser administrador." };
+  }
+
   const supabase = await createAdminClient();
   const { error } = await supabase.from("events").delete().eq("id", id);
   

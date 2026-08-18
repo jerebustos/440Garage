@@ -34,3 +34,12 @@ export async function logout() {
   revalidatePath("/", "layout");
   redirect("/admin/login");
 }
+
+export async function checkIsAdmin() {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return false;
+  
+  const email = session.user.email;
+  return email === 'admin@440garage.com' || email === 'jerebustos20@gmail.com';
+}

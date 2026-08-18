@@ -2,13 +2,11 @@
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { checkIsAdmin } from "@/app/actions/authActions";
 
 export async function getAllOrders() {
-  const authClient = await createClient();
-
-  // Verificar admin status (opcional pero recomendado)
-  const { data: { user } } = await authClient.auth.getUser();
-  if (!user) return { success: false, data: [] };
+  const isAdmin = await checkIsAdmin();
+  if (!isAdmin) return { success: false, data: [] };
 
   const supabase = await createAdminClient();
 
@@ -64,9 +62,8 @@ export async function getAllOrders() {
 
 export async function updateOrderStatus(orderId: string, status: string) {
   try {
-    const authClient = await createClient();
-    const { data: { user } } = await authClient.auth.getUser();
-    if (!user) return { success: false, error: "No autorizado" };
+    const isAdmin = await checkIsAdmin();
+    if (!isAdmin) return { success: false, error: "No autorizado" };
 
     const supabase = await createAdminClient();
     
@@ -86,9 +83,8 @@ export async function updateOrderStatus(orderId: string, status: string) {
 
 export async function deleteOrder(orderId: string) {
   try {
-    const authClient = await createClient();
-    const { data: { user } } = await authClient.auth.getUser();
-    if (!user) return { success: false, error: "No autorizado" };
+    const isAdmin = await checkIsAdmin();
+    if (!isAdmin) return { success: false, error: "No autorizado" };
 
     const supabase = await createAdminClient();
     
